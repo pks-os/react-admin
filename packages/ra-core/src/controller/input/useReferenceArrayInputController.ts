@@ -54,6 +54,18 @@ export const useReferenceArrayInputController = (
     } = props;
     const resource = useResourceContext(props);
     const translate = useTranslate();
+    const [version, setVersion] = useState(0);
+    const finalOptions = useMemo(
+        () => ({
+            ...options,
+            version,
+        }),
+        [version, options]
+    );
+
+    const refetch = useCallback(() => {
+        setVersion(oldVersion => oldVersion + 1);
+    }, []);
 
     // We store the current input value in a ref so that we are able to fetch
     // only the missing references when the input value changes
@@ -263,7 +275,7 @@ export const useReferenceArrayInputController = (
         finalFilter,
         source,
         resource,
-        options
+        finalOptions
     );
 
     // We merge the currently selected records with the matching ones, otherwise
@@ -308,6 +320,7 @@ export const useReferenceArrayInputController = (
         page,
         perPage,
         resource,
+        refetch,
         selectedIds: input.value,
         setFilter,
         setFilters,

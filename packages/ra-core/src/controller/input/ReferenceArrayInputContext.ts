@@ -22,6 +22,7 @@ export interface ReferenceArrayInputContextValue {
     warning?: any;
     loading: boolean;
     loaded: boolean;
+    refetch: () => void;
     setFilter: (filter: any) => void;
     setPagination: (pagination: PaginationPayload) => void;
     setSort: (sort: SortPayload) => void;

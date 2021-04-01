@@ -548,6 +548,8 @@ interface Options {
 
 export interface AutocompleteArrayInputProps
     extends ChoicesInputProps<TextFieldProps & Options>,
-        Omit<DownshiftProps<any>, 'onChange'> {}
+        Omit<DownshiftProps<any>, 'onChange'> {
+    onNewItem?: (item: string) => Promise<any>;
+}
 
 export default AutocompleteArrayInput;

@@ -19,6 +19,10 @@ describe('<ReferenceArrayInputController />', () => {
         source: 'tag_ids',
     };
 
+    beforeEach(async () => {
+        await new Promise(resolve => setTimeout(resolve, 200));
+    });
+
     it('should set loading to true as long as there are no references fetched and no selected references', () => {
         const children = jest.fn(({ loading }) => (
             <div>{loading.toString()}</div>
@@ -357,6 +361,7 @@ describe('<ReferenceArrayInputController />', () => {
             meta: {
                 relatedTo: 'posts@tag_ids',
                 resource: 'tags',
+                version: 0,
             },
             payload: {
                 pagination: {
@@ -395,6 +400,7 @@ describe('<ReferenceArrayInputController />', () => {
             meta: {
                 relatedTo: 'posts@tag_ids',
                 resource: 'tags',
+                version: 0,
             },
             payload: {
                 pagination: {
@@ -434,6 +440,7 @@ describe('<ReferenceArrayInputController />', () => {
                 meta: {
                     relatedTo: 'posts@tag_ids',
                     resource: 'tags',
+                    version: 0,
                 },
                 payload: {
                     pagination: {
@@ -477,6 +484,7 @@ describe('<ReferenceArrayInputController />', () => {
                 meta: {
                     relatedTo: 'posts@tag_ids',
                     resource: 'tags',
+                    version: 0,
                 },
                 payload: {
                     pagination: {
@@ -825,6 +833,7 @@ describe('<ReferenceArrayInputController />', () => {
                 meta: {
                     relatedTo: 'posts@tag_ids',
                     resource: 'tags',
+                    version: 0,
                 },
                 payload: {
                     pagination: {
@@ -847,6 +856,7 @@ describe('<ReferenceArrayInputController />', () => {
                 meta: {
                     relatedTo: 'posts@tag_ids',
                     resource: 'tags',
+                    version: 0,
                 },
                 payload: {
                     pagination: {
@@ -869,6 +879,7 @@ describe('<ReferenceArrayInputController />', () => {
                 meta: {
                     relatedTo: 'posts@tag_ids',
                     resource: 'tags',
+                    version: 0,
                 },
                 payload: {
                     pagination: {
@@ -887,7 +898,7 @@ describe('<ReferenceArrayInputController />', () => {
 
     it('should call its children with the correct resource and basePath', () => {
         const children = jest.fn(() => null);
-        renderWithRedux(
+        const { unmount } = renderWithRedux(
             <Form
                 onSubmit={jest.fn()}
                 render={() => (
@@ -904,5 +915,43 @@ describe('<ReferenceArrayInputController />', () => {
 
         expect(children.mock.calls[0][0].resource).toEqual('posts');
         expect(children.mock.calls[0][0].basePath).toEqual('/posts');
+    });
+
+    it('should allow to refetch its data', async () => {
+        const children = jest.fn(({ refetch }) => {
+            return <button onClick={() => refetch()}>Refetch</button>;
+        });
+        const { getByText, dispatch } = renderWithRedux(
+            <Form
+                onSubmit={jest.fn()}
+                render={() => (
+                    <ReferenceArrayInputController
+                        {...defaultProps}
+                        input={{ value: [1, 2] }}
+                    >
+                        {children}
+                    </ReferenceArrayInputController>
+                )}
+            />,
+            { admin: { resources: { tags: { data: {} } } } }
+        );
+
+        await waitFor(() => {
+            expect(
+                dispatch.mock.calls.filter(
+                    call => call[0].type === CRUD_GET_MATCHING
+                ).length
+            ).toEqual(1);
+        });
+
+        fireEvent.click(getByText('Refetch'));
+
+        await waitFor(() => {
+            expect(
+                dispatch.mock.calls.filter(
+                    call => call[0].type === CRUD_GET_MATCHING
+                ).length
+            ).toEqual(2);
+        });
     });
 });
